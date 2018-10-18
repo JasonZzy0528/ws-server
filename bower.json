@@ -1,0 +1,22 @@
+{
+  "name": "ws-server",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Zeyu Zhao <zeyu.zhao@unimelb.edu.au>"
+  ],
+  "license": "ISC",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "client/bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "chainpad-netflux": "^0.8.0",
+    "chainpad": "^5.1.2"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "verbose": false,
+  "ignore": [
+    "dist",
+    "node_modules",
+    "package.json",
+    "yarn.lock"
+  ],
+  "env": {
+    "BABEL_DISABLE_CACHE": 1
+  },
+  "execMap": {
+    "js": "babel-node --inspect"
+  },
+  "ext": "js"
+}
