@@ -7,7 +7,9 @@ const config = {
     app: path.resolve(__dirname, '..', 'client', 'index.js')
   },
   output: path.resolve(__dirname, '..', 'dist'),
-  template: path.resolve(__dirname, '..', 'client', 'template', 'index.html')
+  template: path.resolve(__dirname, '..', 'client', 'template', 'index.html'),
+  wsport: 8080,
+  port: 3000
 }
 
 export default config

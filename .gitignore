@@ -1,2 +1,7 @@
-node_modules
+build/
 client/bower_components
+client/requirejs/
+datastore
+dist
+node_modules
+storage

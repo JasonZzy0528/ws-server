@@ -68,5 +68,6 @@ module.exports = {
   /* If removeChannels is true, the number of milliseconds to wait between the
   * last person leaving the channel and the time when it is deleted.
   */
-  channelRemovalTimeout: 60000
+  channelRemovalTimeout: 60000,
+  websocketURL: 'ws://localhost:3000/cryptpad_websocket'
 }

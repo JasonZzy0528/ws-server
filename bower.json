@@ -16,7 +16,6 @@
     "tests"
   ],
   "dependencies": {
-    "chainpad-netflux": "^0.8.0",
     "chainpad": "^5.1.2"
   }
 }

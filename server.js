@@ -7,20 +7,14 @@ import WebSocket from 'ws'
 import path from 'path'
 
 import { RESPONSE_ACK } from './constants'
-import Storage from './storage/file'
 import config from './config'
 import logger from './logger'
 import webpackDevConf from './webpack/conf.dev'
-import wsconfig from './wsconfig'
-import NetfluxSrv from './node_modules/chainpad-server/NetfluxWebsocketSrv'
 
-const wss = new WebSocket.Server({ host: wsconfig.host, port: wsconfig.port })
-Storage.create(wsconfig, (store) => {
-  NetfluxSrv.run(store, wss, wsconfig)
-})
+const wss = new WebSocket.Server({ port: config.wsport })
 
 const app = express()
-const port = 8080
+const port = config.port
 
 let compiler = webpack(webpackDevConf)
 let devMiddleware = webpackDevMiddleware(compiler, {
@@ -48,31 +42,31 @@ devMiddleware.waitUntilValid(() => {
   logger.info(`🚀 Application started, listening at on port ${port}`)
 })
 
-// let blocks = []
-// // Broadcast to everyone else.
-// wss.broadcast = (ws, message) => {
-//   wss.clients.forEach(client => {
-//     // client !== ws &&
-//     if (client !== ws && client.readyState === WebSocket.OPEN) {
-//       const data = {
-//         type: 'patch',
-//         data: message
-//       }
-//       client.send(JSON.stringify(data))
-//     }
-//   })
-// }
-//
-// wss.on('connection', ws => {
-//   ws.on('message', message => {
-//     console.log('received: %s', message)
-//     ws.send(RESPONSE_ACK)
-//     blocks.push(message)
-//     wss.broadcast(ws, message)
-//   })
-//   const data = {
-//     type: 'blocks',
-//     data: blocks
-//   }
-//   ws.send(JSON.stringify(data))
-// })
+let blocks = []
+// Broadcast to everyone else.
+wss.broadcast = (ws, message) => {
+  wss.clients.forEach(client => {
+    // client !== ws &&
+    if (client !== ws && client.readyState === WebSocket.OPEN) {
+      const data = {
+        type: 'patch',
+        data: message
+      }
+      client.send(JSON.stringify(data))
+    }
+  })
+}
+
+wss.on('connection', ws => {
+  ws.on('message', message => {
+    console.log('received: %s', message)
+    blocks.push(message)
+    wss.broadcast(ws, message)
+    ws.send(RESPONSE_ACK)
+  })
+  const data = {
+    type: 'blocks',
+    data: blocks
+  }
+  ws.send(JSON.stringify(data))
+})

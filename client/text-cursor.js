@@ -1,5 +1,5 @@
 
-let transformCursor = (cursor, op) => {
+const transformCursor = (cursor, op) => {
   if (!op) {
     return cursor
   }

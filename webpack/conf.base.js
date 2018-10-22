@@ -1,7 +1,6 @@
 import config from '../config'
-import path from 'path'
 
-const { client, entry, output } = config
+const { entry, output } = config
 const baseWebpackConfig = {
   entry,
   output: {
@@ -54,6 +53,11 @@ const baseWebpackConfig = {
         ]
       }
     ]
+  },
+  resolve: {
+    alias: {
+      bower_components: '../client/bower_components'
+    }
   }
 }
 
