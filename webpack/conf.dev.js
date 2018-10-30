@@ -1,4 +1,5 @@
 import HtmlWebpackPlugin from 'html-webpack-plugin'
+import CopyWebpackPlugin from 'copy-webpack-plugin'
 import merge from 'webpack-merge'
 import webpack from 'webpack'
 
@@ -15,7 +16,8 @@ const devConf = merge(baseWebpackConfig, {
       template: config.template,
       inject: true
     }),
-    new webpack.NamedModulesPlugin()
+    new webpack.NamedModulesPlugin(),
+    new CopyWebpackPlugin(config.staticPkgs)
   ]
 })
 export default devConf

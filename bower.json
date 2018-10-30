@@ -16,6 +16,7 @@
     "tests"
   ],
   "dependencies": {
-    "chainpad": "^5.1.2"
+    "chainpad": "^5.1.2",
+    "hyperjson": "^1.4.0"
   }
 }

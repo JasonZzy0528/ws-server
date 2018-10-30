@@ -24,7 +24,8 @@ let devMiddleware = webpackDevMiddleware(compiler, {
   stats: {
     children: false,
     colors: true,
-    modules: false
+    modules: false,
+    assets: false
   }
 })
 
@@ -58,11 +59,13 @@ wss.broadcast = (ws, message) => {
 }
 
 wss.on('connection', ws => {
-  ws.on('message', message => {
-    console.log('received: %s', message)
+  ws.on('message', data => {
+    console.log('received: %s', data)
+    data = JSON.parse(data)
+    const { message, msgNum } = data
     blocks.push(message)
     wss.broadcast(ws, message)
-    ws.send(RESPONSE_ACK)
+    ws.send(JSON.stringify([msgNum, RESPONSE_ACK]))
   })
   const data = {
     type: 'blocks',

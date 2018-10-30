@@ -10,7 +10,8 @@
     "WebSocket": true,
     "document": true,
     "window": true,
-    "fetch": true
+    "fetch": true,
+    "CKEDITOR": true
   },
   "parser": "babel-eslint",
   "parserOptions": {

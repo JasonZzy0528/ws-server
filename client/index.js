@@ -1,89 +1,95 @@
-import { pullAt } from 'lodash'
-import './index.scss'
+// // import { isArray } from 'lodash'
+// import './index.scss'
 import * as ChainPad from './bower_components/chainpad/chainpad.dist'
-import { transform } from './text-cursor'
-import { RESPONSE_ACK } from '../constants'
+// import { transform } from './text-cursor'
+// import { RESPONSE_ACK } from '../constants'
 import serverConf from '../config'
 
-const textarea = document.querySelector('#log-textarea')
-let selectionStart
-let content = textarea.value
+import { editorInit, listenOnChange, getEditorHyperjson, hjsonToDom, mkDiffOptions } from './editor'
+import DiffDOM from 'diff-dom'
+import Cursor from './cursor'
 
-const config = {
-  username: 'username',
-  initalValue: content
-}
-const chainpad = ChainPad.create(config)
+const el = document.querySelector('#log-textarea')
 
-const wsAddress = `ws://${window.location.hostname}:${serverConf.wsport}`
-let socket = new WebSocket(wsAddress)
-let queue = []
+const editor = editorInit(el)
+let msgNum = 0
 
-textarea.addEventListener('keyup', evt => {
-  const el = evt.srcElement
-  selectionStart = textarea.selectionStart
-  console.error('keyup', el.value, chainpad.getUserDoc(), selectionStart)
-  const value = el.value
-  const userDoc = chainpad.getUserDoc()
-  if (value !== userDoc) {
-    chainpad.contentUpdate(el.value)
-    chainpad.sync()
+// let queue = {}
+
+CKEDITOR.once('instanceReady', () => {
+  const initalValue = JSON.stringify(getEditorHyperjson(editor))
+  const userName = window.location.pathname.replace('/', '')
+  const config = {
+    userName: userName,
+    initalValue,
+    diffBlockSize: 100
   }
-})
+  const chainpad = ChainPad.create(config)
 
-textarea.addEventListener('focus', () => {
-  selectionStart = textarea.selectionStart
-})
+  listenOnChange(editor, chainpad)
+  const wsAddress = `ws://${window.location.hostname}:${serverConf.wsport}`
+  let socket = new WebSocket(wsAddress)
 
-textarea.addEventListener('blur', () => {
-  selectionStart = null
-})
-
-
-socket.onopen = () => {
-  socket.onmessage = evt => {
-    try {
-      const { type, data } = JSON.parse(evt.data)
+  socket.onopen = () => {
+    socket.onmessage = evt => {
+      const res = JSON.parse(evt.data)
+      const data = res.data
+      const type = res.type
       if (type === 'blocks') {
         data.forEach(block => {
           chainpad.message(block)
         })
-      } else {
-        console.error('socket onmessage', textarea.selectionStart, chainpad.getAuthDoc(), chainpad.getUserDoc())
+      } else if (type === 'patch') {
         chainpad.message(data)
       }
-    } catch (err) {
-      // pass
-      if (evt.data === RESPONSE_ACK) {
-        queue[0]()
-        pullAt(queue, [0])
-      }
+      // if (data === undefined) {
+      //   const status = res[1]
+      //   const num = res[0]
+      //   console.error(num, status)
+      //   if (status === RESPONSE_ACK) {
+      //     setTimeout(function () {
+      //       queue[num]()
+      //       delete queue[num]
+      //     }, 1)
+      //   }
+      // }
     }
   }
+
   chainpad.onMessage((message, cb) => {
-    console.error('onMessage', chainpad.getLag(), chainpad.getUserDoc())
-    socket.send(message)
-    queue.push(cb)
+    msgNum ++
+    message = {
+      message,
+      msgNum
+    }
+    socket.send(JSON.stringify(message))
+    // queue[msgNum] = cb
+    setTimeout(() => {
+      cb()
+    },1)
   })
-}
+  const inner = editor.editable().$
+  const cursor = Cursor(inner)
+  var DD = new DiffDOM(mkDiffOptions(cursor, editor.focusManager.hasFocus))
 
-chainpad.onChange(function (offset, toRemove, toInsert) {
-  console.error('onchange', offset, toRemove, toInsert, selectionStart)
-  const oldContent = textarea.value
-  const newContent = chainpad.getUserDoc()
-  const ops = ChainPad.Diff.diff(oldContent, newContent)
-  let cursorPosition = selectionStart
-  textarea.value = newContent
-  cursorPosition = transform(cursorPosition, ops)
-  textarea.selectionStart = cursorPosition
-  textarea.selectionEnd = cursorPosition
-  selectionStart = textarea.selectionStart
+  const contentUpdate = () => {
+    const hjson = JSON.parse(chainpad.getUserDoc())
+    var userDocStateDom = hjsonToDom(hjson)
+    userDocStateDom.normalize()
+    inner.normalize()
+    var patch = DD.diff(inner, userDocStateDom)
+    DD.apply(inner, patch)
+  }
+
+  chainpad.onPatch(() => {
+    contentUpdate()
+  })
+  chainpad.start()
+  window.chainpad = chainpad
+
+  window.setInterval(() => {
+    chainpad.onSettle(() => {
+      contentUpdate()
+    })
+  }, 2000)
 })
-
-// chainpad.onPatch(patch => {
-//   console.error('onPatch', patch, textarea.selectionStart, chainpad.getUserDoc())
-// })
-
-chainpad.start()
-window.chainpad = chainpad
-window.queue = queue
