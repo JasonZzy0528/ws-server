@@ -1,8 +1,4 @@
-// // import { isArray } from 'lodash'
-// import './index.scss'
 import * as ChainPad from './bower_components/chainpad/chainpad.dist'
-// import { transform } from './text-cursor'
-// import { RESPONSE_ACK } from '../constants'
 import serverConf from '../config'
 
 import { editorInit, listenOnChange, getEditorHyperjson, hjsonToDom, mkDiffOptions } from './editor'
@@ -14,15 +10,14 @@ const el = document.querySelector('#log-textarea')
 const editor = editorInit(el)
 let msgNum = 0
 
-// let queue = {}
-
 CKEDITOR.once('instanceReady', () => {
-  const initalValue = JSON.stringify(getEditorHyperjson(editor))
+  const initialState = JSON.stringify(getEditorHyperjson(editor))
   const userName = window.location.pathname.replace('/', '')
   const config = {
     userName: userName,
-    initalValue,
-    diffBlockSize: 100
+    initialState,
+    diffBlockSize: 100,
+    // checkpointInterval: 1
   }
   const chainpad = ChainPad.create(config)
 
@@ -40,19 +35,10 @@ CKEDITOR.once('instanceReady', () => {
           chainpad.message(block)
         })
       } else if (type === 'patch') {
+        const newContent = JSON.stringify(getEditorHyperjson(editor))
+        chainpad.contentUpdate(newContent)
         chainpad.message(data)
       }
-      // if (data === undefined) {
-      //   const status = res[1]
-      //   const num = res[0]
-      //   console.error(num, status)
-      //   if (status === RESPONSE_ACK) {
-      //     setTimeout(function () {
-      //       queue[num]()
-      //       delete queue[num]
-      //     }, 1)
-      //   }
-      // }
     }
   }
 
@@ -63,7 +49,6 @@ CKEDITOR.once('instanceReady', () => {
       msgNum
     }
     socket.send(JSON.stringify(message))
-    // queue[msgNum] = cb
     setTimeout(() => {
       cb()
     },1)

@@ -20,7 +20,7 @@ const config = {
   client: path.resolve(__dirname, '..', 'client'),
   devtool: 'cheap-module-eval-source-map',
   entry: {
-    app: path.resolve(__dirname, '..', 'client', 'index.js')
+    app: ['babel-polyfill', path.resolve(__dirname, '..', 'client', 'index.js')]
   },
   staticPkgs,
   output: path.resolve(__dirname, '..', 'dist'),

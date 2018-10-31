@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-polyfill": "^6.26.0",
     "chainpad-server": "^2.1.4",
     "ckeditor": "4.10.1",
     "diff-dom": "^2.4.0",
