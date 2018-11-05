@@ -20,7 +20,7 @@ export const listenOnChange = (editor, chainpad) => {
 
 export const editorInit = (el) => {
   if (el) {
-    const editor = CKEDITOR.replace(el)
+    const editor = CKEDITOR.inline(el)
     return editor
   }
   throw new Error('Unexpected el ', el)

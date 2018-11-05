@@ -1,5 +1,6 @@
 import * as ChainPad from './bower_components/chainpad/chainpad.dist'
 import serverConf from '../config'
+import './index.scss'
 
 import { editorInit, listenOnChange, getEditorHyperjson, hjsonToDom, mkDiffOptions } from './editor'
 import DiffDOM from 'diff-dom'
@@ -72,9 +73,9 @@ CKEDITOR.once('instanceReady', () => {
   chainpad.start()
   window.chainpad = chainpad
 
-  window.setInterval(() => {
-    chainpad.onSettle(() => {
-      contentUpdate()
-    })
-  }, 2000)
+  // window.setInterval(() => {
+  //   chainpad.onSettle(() => {
+  //     contentUpdate()
+  //   })
+  // }, 2000)
 })
